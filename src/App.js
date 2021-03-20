@@ -4,60 +4,48 @@ import { Component } from  'react';
 class App extends Component{
   state = {
     counter: 0,
-    posts: [
-      {
-        id: 1,
-        title: 'Titulo 1',
-        body: 'Corpo 01 Post novo'
-      },
-      {
-        id: 2,
-        title: 'Titulo 2',
-        body: 'Corpo 02 Post novo'
-      },
-      {
-        id: 3,
-        title: 'Titulo 3',
-        body: 'Corpo 03 Post novo'
-      }
-    ]
+    posts: []
   }
 
   timeoutUpdate = null;
 
   componentDidMount(){
-   this.handleTimeout();
-  }
-  componentDidUpdate(){
-    this.handleTimeout();
+    this.loadPosts();
   }
 
-  componentWillUnmount(){
-    clearTimeout(this.timeoutUpdate);
-  }
+  loadPosts = async () => {
+    const postsResponse = fetch('http://jsonplaceholder.typicode.com/posts');
+    const photosResponse = fetch('http://jsonplaceholder.typicode.com/photos');
 
-  handleTimeout = () => {
-    const { posts, counter } = this.state;
-    posts[0].title = 'New Title here!';
+    const [posts, photos] = await Promise.all([postsResponse, photosResponse]);
 
-    this.timeoutUpdate = setTimeout(() =>{
-      this.setState({ posts, counter: counter + 1 });
-    }, 1000);
+    const postsJson = await posts.json();
+    const photosJson = await photos.json();
+
+    const postsAndPhotos = postsJson.map((post, index) => {
+      return {...post, cover: photosJson[index].url }
+    })
+
+    this.setState({ posts: postsAndPhotos });
   }
 
   render(){
-    const { posts, counter } = this.state;
+    const { posts } = this.state;
     return (
-      <div className="App">
-        <span>{counter}</span>
+      <section className="container">
+        <div className="posts">
         {posts.map( post => (
-          <div key={post.id}>
-            <h1 key={post.id}>{post.title}</h1>
-            <article>{post.body}</article>
+          <div className="post">
+            <img src={post.cover} alt={post.title} />
+            <div key={post.id} className="post-content">
+              <h1 key={post.id}>{post.title}</h1>
+              <article>{post.body}</article>
+            </div>
           </div>
         )
         )}
-      </div>
+        </div>
+      </section>
     );
   }
 }
