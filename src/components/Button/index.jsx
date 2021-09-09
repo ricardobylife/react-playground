@@ -2,7 +2,7 @@ import P from 'prop-types';
 import React from 'react';
 import './styles.css';
 
-export const Button = ({ text, onClick, disabled = false }) => (
+export const Button = ({ text, onClick, disabled }) => (
   <button disabled={disabled} className="button" onClick={onClick}>
     {text}
   </button>
